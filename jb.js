@@ -47,11 +47,14 @@ function terse(s) {
   return s;
 }
 
-const SHOW_LOG = params.get("log") === "1";
+const SHOW_LOG = true;
 if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
-  if (SHOW_LOG || !document.body) return;
-  document.body.className = ok ? "done" : "fail";
+  const button = document.getElementById("start");
+  if (button) button.textContent = ok ? "CONCLUÍDO" : "FINALIZADO";
+  if (ok) state("concluído — payload em execução", "ok");
+  else if (stateEl && stateEl.className !== "bad")
+    state("finalizado sem confirmação do payload; consulte o log", "warn");
 }
 function mark(tag, detail) {
   const raw = detail;
@@ -86,7 +89,7 @@ function trace(tag, detail) {
 }
 function state(t, c) {
   if (!SHOW_LOG || !stateEl) return;
-  stateEl.textContent = t;
+  stateEl.textContent = "Estado: " + t;
   stateEl.className = c || "";
 }
 function check(name, ok, detail) {
@@ -281,6 +284,7 @@ let allDone = false,
       );
       setTimeout(() => {
         try {
+          try { sessionStorage.setItem("raw-jb-resume", location.pathname + location.search); } catch (eStorage) {}
           location.reload();
         } catch (e) {}
       }, 400);
